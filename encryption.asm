@@ -34,12 +34,6 @@ Encryption PROC PUBLIC
 
 EncryptMenu:
 call crlf
- mov edx, OFFSET takeWord
-    call WriteString
-    mov edx, OFFSET encryptionWord
-    mov ecx, SIZEOF encryptionWord-1  ;how many letetrs are allowed
-    call ReadString
-    mov sizeWord, eax
 
     mov edx, OFFSET encryptMenuMsg
     call WriteString
@@ -56,7 +50,17 @@ call crlf
     call WriteString
     jmp EncryptMenu
 
+  
+
+
 CaesarEncrypt:
+       mov edx, OFFSET takeWord
+    call WriteString
+    mov edx, OFFSET encryptionWord
+    mov ecx, SIZEOF encryptionWord-1  ;how many letetrs are allowed
+    call ReadString
+    mov sizeWord, eax
+
     mov edx, OFFSET encryptingmsg
     call WriteString
     call crlf
@@ -111,6 +115,13 @@ skipCharacter:
     jmp EncryptMenu ;to go again to menu to try different cipher
 
 XOREncrypt:
+       mov edx, OFFSET takeWord
+    call WriteString
+    mov edx, OFFSET encryptionWord
+    mov ecx, SIZEOF encryptionWord-1  ;how many letetrs are allowed
+    call ReadString
+    mov sizeWord, eax
+
     mov edx, OFFSET encryptingmsg
     call WriteString
     call Crlf
@@ -150,6 +161,13 @@ doneXOR:
     call WaitMsg
     jmp EncryptMenu
 VigenereEncrypt:
+       mov edx, OFFSET takeWord
+    call WriteString
+    mov edx, OFFSET encryptionWord
+    mov ecx, SIZEOF encryptionWord-1  ;how many letetrs are allowed
+    call ReadString
+    mov sizeWord, eax
+
     mov edx, OFFSET encryptingmsg
     call WriteString
     call Crlf
