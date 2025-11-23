@@ -214,14 +214,14 @@ VigenereCheckLower:
     sub al, 'a'
     mov bl, [edi]
     cmp bl, 'a'
-    jl VigenereKeyUpperLower
+    jl VigenereKeyUpperForLower
     sub bl, 'a'
-    jmp VigenereKeyNormalize
+    jmp VigenereContinueUpperForLower
 
-VigenereKeyUpperLower:
+VigenereKeyUpperForLower:
     sub bl, 'A'
 
-VigenereKeyNormalize:
+VigenereContinueUpperForLower:
     add al, bl
     cmp al, 26
     jl NoWrapLowerV
