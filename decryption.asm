@@ -34,12 +34,6 @@ Decryption PROC PUBLIC
     
 DecryptMenu:
     call crlf
-    mov edx, OFFSET takeWord
-    call WriteString
-    mov edx, OFFSET decryptionWord
-    mov ecx, SIZEOF decryptionWord - 1
-    call ReadString
-    mov sizeWord, eax
 
     mov edx, OFFSET decryptMenuMsg
     call WriteString
@@ -59,6 +53,13 @@ DecryptMenu:
     jmp DecryptMenu
 
 CaesarDecrypt:
+        mov edx, OFFSET takeWord
+    call WriteString
+    mov edx, OFFSET decryptionWord
+    mov ecx, SIZEOF decryptionWord - 1
+    call ReadString
+    mov sizeWord, eax
+
     mov edx, OFFSET decryptingmsg
     call WriteString
     call Crlf
@@ -121,6 +122,13 @@ CaesarDone:
     jmp DecryptMenu
 
 XORDecrypt:
+    mov edx, OFFSET takeWord
+    call WriteString
+    mov edx, OFFSET decryptionWord
+    mov ecx, SIZEOF decryptionWord - 1
+    call ReadString
+    mov sizeWord, eax
+
     mov edx, OFFSET decryptingmsg
     call WriteString
     call Crlf
@@ -171,6 +179,13 @@ XORDone:
     jmp DecryptMenu
 
 VigenereDecrypt:
+     mov edx, OFFSET takeWord
+    call WriteString
+    mov edx, OFFSET decryptionWord
+    mov ecx, SIZEOF decryptionWord - 1
+    call ReadString
+    mov sizeWord, eax
+
     mov edx, OFFSET decryptingmsg
     call WriteString
     call Crlf
