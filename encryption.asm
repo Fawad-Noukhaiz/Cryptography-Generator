@@ -30,34 +30,29 @@ outputMessage BYTE "The Encrypted value is: ",0
 .code
 Encryption PROC PUBLIC
     call Clrscr
-   
 
-EncryptMenu:
-call crlf
-
+EncryptionMenu:
+    call crlf
     mov edx, OFFSET encryptMenuMsg
     call WriteString
     call ReadInt
     cmp eax, 1
-    je CaesarEncrypt
+    je CaesarCipher
     cmp eax, 2
-    je XOREncrypt
+    je XorCipher
     cmp eax, 3
-    je VigenereEncrypt
+    je VigenereCipher
     cmp eax, 4
-    je BackToMain
+    je ReturnMainMenu
     mov edx, OFFSET invalidEncryptMsg
     call WriteString
-    jmp EncryptMenu
+    jmp EncryptionMenu
 
-  
-
-
-CaesarEncrypt:
-       mov edx, OFFSET takeWord
+CaesarCipher:
+    mov edx, OFFSET takeWord
     call WriteString
     mov edx, OFFSET encryptionWord
-    mov ecx, SIZEOF encryptionWord-1  ;how many letetrs are allowed
+    mov ecx, SIZEOF encryptionWord-1
     call ReadString
     mov sizeWord, eax
 
@@ -71,87 +66,39 @@ CaesarEncrypt:
     mov caesarKey, al
     mov esi, offset encryptionWord
 
-ReadCharacter:
+CaesarProcessChar:
     mov al, [esi]
     cmp al, 'A'
-    jl skipCharacter
+    jl CaesarNextChar
     cmp al, 'Z'
-    jg checkLower
+    jg CaesarCheckLower
     sub al, 'A'
     add al, caesarKey
     cmp al, 26
-    jl uc_noRepeat
+    jl NoWrapUpper
     sub al, 26
-uc_noRepeat:
+NoWrapUpper:
     add al, 'A'
-    jmp skipCharacter
 
-checkLower:
+CaesarCheckLower:
     cmp al, 'a'
-    jl skipCharacter
+    jl CaesarNextChar
     cmp al, 'z'
-    jg skipCharacter
+    jg CaesarNextChar
     sub al, 'a'
     add al, caesarKey
     cmp al, 26
-    jl lc_noRepeat
+    jl NoWrapLower
     sub al, 26
-lc_noRepeat:
+NoWrapLower:
     add al, 'a'
 
-skipCharacter:
+CaesarNextChar:
     mov [esi], al
     inc esi
     cmp byte ptr [esi], 0
-    jne ReadCharacter
+    jne CaesarProcessChar
 
-    mov edx, OFFSET outputMessage
-    call WriteString
-    call Crlf
-    mov edx, offset encryptionWord
-    call WriteString
-    call Crlf
-    call WaitMsg    ;to wait to see encrypted string then go to menu
-    jmp EncryptMenu ;to go again to menu to try different cipher
-
-XOREncrypt:
-       mov edx, OFFSET takeWord
-    call WriteString
-    mov edx, OFFSET encryptionWord
-    mov ecx, SIZEOF encryptionWord-1  ;how many letetrs are allowed
-    call ReadString
-    mov sizeWord, eax
-
-    mov edx, OFFSET encryptingmsg
-    call WriteString
-    call Crlf
-    mov ecx, 5
-    mov edi, offset xorKey
-l1:
-    mov edx, offset xorInput
-    call WriteString
-    call readint
-    mov [edi], al
-    call crlf
-    inc edi
-    loop l1
-
-    mov esi, offset encryptionWord
-    mov edi, offset xorKey
-xorr:
-    mov al, [esi]
-    cmp al, 0
-    je doneXOR
-    xor al, [edi]
-    mov [esi], al
-    inc esi
-    inc edi
-    cmp edi, offset xorKey + 5
-    jb noRepeatXOR
-    mov edi, offset xorKey
-noRepeatXOR:
-    jmp xorr
-doneXOR:
     mov edx, OFFSET outputMessage
     call WriteString
     call Crlf
@@ -159,18 +106,67 @@ doneXOR:
     call WriteString
     call Crlf
     call WaitMsg
-    jmp EncryptMenu
-VigenereEncrypt:
-       mov edx, OFFSET takeWord
+    jmp EncryptionMenu
+
+XorCipher:
+    mov edx, OFFSET takeWord
     call WriteString
     mov edx, OFFSET encryptionWord
-    mov ecx, SIZEOF encryptionWord-1  ;how many letetrs are allowed
+    mov ecx, SIZEOF encryptionWord-1
     call ReadString
     mov sizeWord, eax
 
     mov edx, OFFSET encryptingmsg
     call WriteString
+    call crlf
+
+    mov ecx, 5
+    mov edi, offset xorKey
+XorReadKeyLoop:
+    mov edx, offset xorInput
+    call WriteString
+    call readint
+    mov [edi], al
+    call crlf
+    inc edi
+    loop XorReadKeyLoop
+
+    mov esi, offset encryptionWord
+    mov edi, offset xorKey
+XorProcessChar:
+    mov al, [esi]
+    cmp al, 0
+    je XorFinish
+    xor al, [edi]
+    mov [esi], al
+    inc esi
+    inc edi
+    cmp edi, offset xorKey + 5
+    jb NoWrapXOR
+    mov edi, offset xorKey
+NoWrapXOR:
+    jmp XorProcessChar
+XorFinish:
+    mov edx, OFFSET outputMessage
+    call WriteString
     call Crlf
+    mov edx, offset encryptionWord
+    call WriteString
+    call Crlf
+    call WaitMsg
+    jmp EncryptionMenu
+
+VigenereCipher:
+    mov edx, OFFSET takeWord
+    call WriteString
+    mov edx, OFFSET encryptionWord
+    mov ecx, SIZEOF encryptionWord-1
+    call ReadString
+    mov sizeWord, eax
+
+    mov edx, OFFSET encryptingmsg
+    call WriteString
+    call crlf
     mov edx, OFFSET vigenereInput
     call WriteString
     mov edx, OFFSET vigenereKey
@@ -179,63 +175,71 @@ VigenereEncrypt:
 
     mov esi, offset encryptionWord
     mov edi, offset vigenereKey
-vigenereLoop:
-    mov al, [esi]
-    cmp al, 0
-    je vigeDone
 
+VigenereProcessChar:
+    mov al, [esi]
     cmp al, 'A'
-    jl skipV
+    jl VigenereNextChar
     cmp al, 'Z'
-    jg checkLowerV
+    jg VigenereCheckLower
     sub al, 'A'
     mov bl, [edi]
     cmp bl, 'a'
-    jl keyIsUpper
+    jl VigenereKeyUpper
     sub bl, 'a'
-    jmp continueEncrypt
-    keyIsUpper:
+    jmp VigenereContinueUpper
+
+VigenereKeyUpper:
     sub bl, 'A'
-continueEncrypt:
-add al, bl
+
+VigenereContinueUpper:
+    add al, bl
     cmp al, 26
-    jl ucVNoRepeat
+    jl NoWrapUpperV
     sub al, 26
-ucVNoRepeat:
+NoWrapUpperV:
     add al, 'A'
     mov [esi], al
     inc edi
-    cmp byte ptr [edi], 0    
-    jne skipV
+    cmp byte ptr [edi], 0
+    jne VigenereNextChar
     mov edi, offset vigenereKey
-    jmp skipV
+    jmp VigenereNextChar
 
-checkLowerV:
+VigenereCheckLower:
     cmp al, 'a'
-    jl skipV
+    jl VigenereNextChar
     cmp al, 'z'
-    jg skipV
+    jg VigenereNextChar
     sub al, 'a'
     mov bl, [edi]
+    cmp bl, 'a'
+    jl VigenereKeyUpperLower
     sub bl, 'a'
+    jmp VigenereKeyNormalize
+
+VigenereKeyUpperLower:
+    sub bl, 'A'
+
+VigenereKeyNormalize:
     add al, bl
     cmp al, 26
-    jl lcVNoRepeat
+    jl NoWrapLowerV
     sub al, 26
-lcVNoRepeat:
+NoWrapLowerV:
     add al, 'a'
     mov [esi], al
     inc edi
-    
-    cmp byte ptr [edi], 0    
-    jne skipV
+    cmp byte ptr [edi], 0
+    jne VigenereNextChar
     mov edi, offset vigenereKey
 
-skipV:
+VigenereNextChar:
     inc esi
-    jmp vigenereLoop
+    cmp byte ptr [esi],0
+    jne VigenereProcessChar
 
-vigeDone:
+VigenereFinish:
     mov edx, OFFSET outputMessage
     call WriteString
     call Crlf
@@ -243,11 +247,11 @@ vigeDone:
     call WriteString
     call Crlf
     call WaitMsg
-    jmp EncryptMenu
+    jmp EncryptionMenu
 
-BackToMain:
+ReturnMainMenu:
     call Clrscr
     ret
-Encryption ENDP
 
+Encryption ENDP
 END
